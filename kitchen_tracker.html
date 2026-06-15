@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>厨电行业品牌数据追踪</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:15px}
+:root{--bg:#fff;--bg2:#f5f5f3;--bg3:#efefed;--text:#1a1a1a;--text2:#666;--text3:#999;--border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);--radius:8px;--radius-lg:12px;--blue:#378ADD;--green:#1D9E75;--red:#D85A30}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1c1e;--bg2:#111;--bg3:#2c2c2e;--text:#f0f0f0;--text2:#aaa;--text3:#666;--border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.22)}body{background:var(--bg2);color:var(--text)}}
+.app{max-width:1200px;margin:0 auto;padding:1.5rem 1rem}
+h1{font-size:20px;font-weight:500;margin-bottom:1.5rem}
+.tab-bar{display:flex;gap:8px;border-bottom:0.5px solid var(--border);margin-bottom:1.5rem}
+.tab{padding:8px 16px;font-size:14px;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500}
+.tab:hover:not(.active){color:var(--text)}
+.panel{display:none}.panel.active{display:block}
+.tabs-sub{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.tab-sub{padding:4px 12px;font-size:13px;border:0.5px solid var(--border);border-radius:20px;cursor:pointer;background:transparent;color:var(--text2)}
+.tab-sub.active{background:var(--text);color:var(--bg);border-color:transparent}
+.section-title{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin:1.5rem 0 .75rem}
+.group-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1rem}
+.form-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:.75rem}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-row{display:flex;flex-direction:column;gap:4px}
+.form-row label{font-size:12px;color:var(--text2)}
+.form-row input,.form-row select,.form-row textarea{border:0.5px solid var(--border2);border-radius:var(--radius);font-size:14px;background:var(--bg);color:var(--text);padding:0 10px}
+.form-row input,.form-row select{height:36px}
+.form-row textarea{padding:8px 10px;resize:vertical;min-height:60px}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--blue)}
+.form-row input[readonly]{background:var(--bg3);color:var(--text2)}
+.btn{height:36px;padding:0 20px;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:14px;cursor:pointer;background:transparent;color:var(--text);transition:all .15s}
+.btn:hover{background:var(--bg3)}.btn-primary{background:var(--text);color:var(--bg);border-color:transparent}.btn-primary:hover{opacity:.85}
+.btn-sm{height:28px;padding:0 12px;font-size:12px}
+.btn-edit{height:24px;padding:0 10px;font-size:11px;border:0.5px solid var(--border2);border-radius:6px;cursor:pointer;background:transparent;color:var(--text2)}.btn-edit:hover{background:var(--bg3);color:var(--text)}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
+.metric{background:var(--bg3);border-radius:var(--radius);padding:.75rem 1rem}
+.metric-label{font-size:12px;color:var(--text2);margin-bottom:4px}.metric-val{font-size:22px;font-weight:500}.metric-yoy{font-size:12px;margin-top:2px}
+.pos{color:#3B6D11}.neg{color:#A32D2D}
+.chart-wrap{position:relative;width:100%;height:280px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+@media(max-width:600px){.chart-row{grid-template-columns:1fr}.form-grid-3{grid-template-columns:1fr 1fr}.form-grid-2{grid-template-columns:1fr}}
+.entry-table{width:100%;border-collapse:collapse;font-size:13px}
+.entry-table th{text-align:left;font-weight:500;font-size:11px;color:var(--text2);padding:6px 6px;border-bottom:0.5px solid var(--border);white-space:nowrap}
+.entry-table td{padding:5px 6px;border-bottom:0.5px solid var(--border);white-space:nowrap}
+.entry-table tr:hover td{background:var(--bg3)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-blue{background:#E6F1FB;color:#0C447C}.badge-amber{background:#FAEEDA;color:#633806}.badge-green{background:#EAF3DE;color:#27500A}.badge-purple{background:#EEEDFE;color:#3C3489}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.filter-row select,.filter-row input[type=month]{height:32px;padding:0 8px;font-size:13px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text)}
+.delete-btn{background:none;border:none;cursor:pointer;color:var(--text2);font-size:13px;padding:2px 6px;border-radius:4px}.delete-btn:hover{color:#A32D2D}
+.upload-zone{border:1px dashed var(--border2);border-radius:var(--radius);padding:1rem;text-align:center;cursor:pointer;color:var(--text2);font-size:13px}.upload-zone:hover{border-color:var(--blue);color:var(--text)}
+.img-preview{width:60px;height:60px;object-fit:contain;border-radius:6px;border:0.5px solid var(--border)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.empty{text-align:center;padding:2rem;color:var(--text2);font-size:13px}
+.divider{height:0.5px;background:var(--border);margin:.75rem 0}
+.tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;background:var(--bg3);color:var(--text2);margin-left:4px}
+.model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.model-card{border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg)}
+.model-img-wrap{width:100%;height:120px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3)}
+.model-img-wrap img{width:100%;height:100%;object-fit:contain}
+.model-info{padding:10px 12px}
+.model-name{font-size:13px;font-weight:500;margin-bottom:4px}
+.model-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.model-specs{margin-top:8px;border-top:0.5px solid var(--border);padding-top:8px}
+.spec-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--text2)}
+.spec-row span:last-child{color:var(--text);font-weight:500;text-align:right;max-width:55%}
+.spec-section-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-top:6px;margin-bottom:2px}
+.pk-bar{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pk-slot{flex:1;min-width:140px;border:1.5px dashed var(--border2);border-radius:var(--radius);padding:8px 12px;text-align:center;color:var(--text3);font-size:13px;cursor:pointer;transition:all .15s}
+.pk-slot.filled{border-color:var(--blue);border-style:solid;color:var(--text);background:var(--bg3)}
+.pk-slot:hover{border-color:var(--blue)}
+.pk-vs{font-size:18px;font-weight:700;color:var(--text3)}
+.pk-table{width:100%;border-collapse:collapse;font-size:13px}
+.pk-table th{padding:8px 12px;font-size:12px;font-weight:500;color:var(--text2);border-bottom:0.5px solid var(--border)}
+.pk-table td{padding:7px 12px;border-bottom:0.5px solid var(--border);vertical-align:middle}
+.pk-table tr:last-child td{border-bottom:none}
+.pk-table .pk-label{color:var(--text2);font-size:12px;width:30%}
+.pk-table .pk-val{text-align:center;font-weight:500}
+.pk-win{color:var(--green)}.pk-lose{color:var(--text3)}
+.pk-win-badge{display:inline-block;padding:1px 6px;background:#EAF3DE;color:#27500A;border-radius:4px;font-size:10px;margin-left:4px}
+.pk-lose-badge{display:inline-block;padding:1px 6px;background:var(--bg3);color:var(--text3);border-radius:4px;font-size:10px;margin-left:4px}
+.pk-section-row td{background:var(--bg3);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:500;padding:5px 12px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.5rem;width:min(700px,96vw);max-height:92vh;overflow-y:auto;border:0.5px solid var(--border)}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;line-height:1}.close-btn:hover{color:var(--text)}
+.spec-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:.5rem}
+.spec-form-row{display:flex;flex-direction:column;gap:3px}
+.spec-form-row label{font-size:11px;color:var(--text3)}
+.spec-form-row input,.spec-form-row select{height:32px;padding:0 8px;border:0.5px solid var(--border2);border-radius:6px;font-size:13px;background:var(--bg);color:var(--text)}
+.feature-toggle{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.5rem}
+.feature-chip{padding:4px 10px;border:0.5px solid var(--border2);border-radius:20px;font-size:12px;cursor:pointer;color:var(--text2);background:transparent;transition:all .15s}
+.feature-chip.on{background:var(--text);color:var(--bg);border-color:transparent}
+.dash-mode-bar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.dash-mode-bar label{font-size:13px;color:var(--text2)}
+.dash-mode-bar input[type=month]{height:32px;padding:0 8px;font-size:13px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text)}
+.mode-chip{padding:4px 14px;border:0.5px solid var(--border2);border-radius:20px;font-size:13px;cursor:pointer;color:var(--text2);background:transparent;transition:all .15s}
+.mode-chip.active{background:var(--text);color:var(--bg);border-color:transparent}
+.custom-cat-chip{padding:3px 10px;border:0.5px solid var(--border2);border-radius:20px;font-size:12px;cursor:pointer;color:var(--text2);background:transparent;display:inline-flex;align-items:center;gap:4px}
+.custom-cat-chip:hover{border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>厨电行业品牌数据追踪</h1>
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('entry',this)"><i class="ti ti-database-plus"></i> 数据录入</button>
+  <button class="tab" onclick="switchTab('dashboard',this)"><i class="ti ti-chart-line"></i> 数据看板</button>
+  <button class="tab" onclick="switchTab('models',this)"><i class="ti ti-device-tv"></i> 明星型号</button>
+</div>
+
+<!-- ===== 录入 ===== -->
+<div id="panel-entry" class="panel active">
+  <div class="tabs-sub">
+    <button class="tab-sub active" onclick="switchSubTab('sub-sales',this)">销量销额</button>
+    <button class="tab-sub" onclick="switchSubTab('sub-model',this)">明星型号</button>
+    <button class="tab-sub" onclick="switchSubTab('sub-cats',this)">品类管理</button>
+  </div>
+
+  <!-- 销量销额 -->
+  <div id="sub-sales">
+    <div class="card">
+      <div class="section-title">录入当月数据</div>
+      <div class="group-label">基础信息</div>
+      <div class="form-grid">
+        <div class="form-row"><label>年月</label><input type="month" id="in-month"></div>
+        <div class="form-row"><label>品牌</label>
+          <select id="in-brand"><option>方太</option><option>老板</option><option>华帝</option><option>西门子</option><option>美的</option><option>行业总计</option><option>自定义</option></select>
+        </div>
+        <div class="form-row"><label>自定义品牌名</label><input type="text" id="in-brand-custom" placeholder="选自定义时填写"></div>
+        <div class="form-row"><label>品类</label><select id="in-cat"></select></div>
+        <div class="form-row"><label>渠道</label>
+          <select id="in-channel"><option>线上</option><option>线下</option><option>专卖店</option><option>KA卖场</option><option>电商</option><option>家装渠道</option><option>下沉市场</option></select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="group-label">本期数据</div>
+      <div class="form-grid-3">
+        <div class="form-row"><label>销量（台）</label><input type="number" id="in-vol" placeholder="0" oninput="calcCurrent()"></div>
+        <div class="form-row"><label>销额（万元）</label><input type="number" id="in-val" placeholder="0" oninput="calcCurrent()"></div>
+        <div class="form-row"><label>均价（元）<span class="tag">自动</span></label><input id="in-price" readonly></div>
+      </div>
+      <div class="divider"></div>
+      <div class="group-label">同比 / 上年数据</div>
+      <div class="form-grid-2">
+        <div>
+          <div class="group-label" style="color:var(--text3)">方式一：填同比反算上年</div>
+          <div class="form-grid-3">
+            <div class="form-row"><label>销量同比（%）</label><input type="number" id="in-yoy-vol" placeholder="如 -5.2" oninput="calcFromYoy()"></div>
+            <div class="form-row"><label>销额同比（%）</label><input type="number" id="in-yoy-val" placeholder="如 3.1" oninput="calcFromYoy()"></div>
+            <div class="form-row"><label>均价同比<span class="tag">自动</span></label><input id="in-yoy-price" readonly></div>
+          </div>
+        </div>
+        <div>
+          <div class="group-label" style="color:var(--text3)">方式二：直接填上年</div>
+          <div class="form-grid-3">
+            <div class="form-row"><label>上年销量（台）</label><input type="number" id="in-vol-ly" placeholder="0" oninput="calcFromLY()"></div>
+            <div class="form-row"><label>上年销额（万元）</label><input type="number" id="in-val-ly" placeholder="0" oninput="calcFromLY()"></div>
+            <div class="form-row"><label>上年均价<span class="tag">自动</span></label><input id="in-price-ly" readonly></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:.75rem">
+        <button class="btn btn-primary" onclick="addEntry()">添加记录</button>
+        <button class="btn" onclick="clearForm()">清空</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div class="section-title" style="margin:0">已录入数据</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="exportData()"><i class="ti ti-download"></i> 导出</button>
+          <button class="btn btn-sm" onclick="document.getElementById('import-file').click()"><i class="ti ti-upload"></i> 导入</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+        </div>
+      </div>
+      <div class="filter-row">
+        <select id="f-month" onchange="renderTable()"><option value="">全部月份</option></select>
+        <select id="f-brand2" onchange="renderTable()"><option value="">全部品牌</option></select>
+        <select id="f-cat2" onchange="renderTable()"><option value="">全部品类</option></select>
+        <select id="f-ch2" onchange="renderTable()"><option value="">全部渠道</option></select>
+      </div>
+      <div id="entry-table-wrap" style="overflow-x:auto"><div class="empty">暂无数据</div></div>
+    </div>
+  </div>
+
+  <!-- 明星型号录入 -->
+  <div id="sub-model" style="display:none">
+    <div class="card">
+      <div class="section-title">录入明星型号</div>
+      <div class="group-label">基础信息</div>
+      <div class="form-grid">
+        <div class="form-row"><label>年月</label><input type="month" id="m-month"></div>
+        <div class="form-row"><label>品牌</label><input type="text" id="m-brand" placeholder="如：方太" oninput="updateModelTotals()"></div>
+        <div class="form-row"><label>品类</label><select id="m-cat" onchange="updateModelTotals();renderSpecForm()"></select></div>
+        <div class="form-row"><label>渠道</label>
+          <select id="m-channel" onchange="updateModelTotals()">
+            <option value="">不限</option><option>线上</option><option>线下</option><option>专卖店</option><option>KA卖场</option><option>电商</option><option>家装渠道</option><option>下沉市场</option>
+          </select>
+        </div>
+        <div class="form-row"><label>型号名称</label><input type="text" id="m-name" placeholder="如：EMS+EMC25TG"></div>
+        <div class="form-row"><label>定价（元）</label><input type="number" id="m-msrp" placeholder="官方售价"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="group-label">销售数据</div>
+      <div id="model-total-hint" style="font-size:12px;color:var(--text2);margin-bottom:.75rem;min-height:18px"></div>
+      <div class="form-grid-2">
+        <div>
+          <div class="group-label" style="color:var(--text3)">直接填写</div>
+          <div class="form-grid-3">
+            <div class="form-row"><label>销量（台）</label><input type="number" id="m-vol" placeholder="0" oninput="calcModelPrice();syncModelPct()"></div>
+            <div class="form-row"><label>销额（万元）</label><input type="number" id="m-val" placeholder="0" oninput="calcModelPrice();syncModelPct()"></div>
+            <div class="form-row"><label>均价（元）<span class="tag">自动</span></label><input id="m-price" readonly></div>
+          </div>
+        </div>
+        <div>
+          <div class="group-label" style="color:var(--text3)">按占比计算</div>
+          <div class="form-grid-3">
+            <div class="form-row"><label>销量占比（%）</label><input type="number" id="m-pct-vol" placeholder="如 12.5" oninput="calcModelFromPct()"></div>
+            <div class="form-row"><label>销额占比（%）</label><input type="number" id="m-pct-val" placeholder="如 15.3" oninput="calcModelFromPct()"></div>
+            <div style="visibility:hidden" class="form-row"><label>占位</label><input></div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="group-label">品类核心参数</div>
+      <div id="spec-form-wrap"></div>
+      <div class="divider"></div>
+      <div class="form-row" style="margin-bottom:.75rem">
+        <label>型号图片（可选）</label>
+        <div class="upload-zone" onclick="document.getElementById('m-img').click()">
+          <i class="ti ti-photo-plus" style="font-size:20px;display:block;margin-bottom:4px"></i>点击上传
+          <input type="file" id="m-img" accept="image/*" style="display:none" onchange="previewImg(event)">
+        </div>
+        <div id="img-preview-wrap" style="margin-top:8px;display:none"><img id="img-preview" class="img-preview"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addModel()">添加型号</button>
+    </div>
+  </div>
+
+  <!-- 品类管理 -->
+  <div id="sub-cats" style="display:none">
+    <div class="card">
+      <div class="section-title">品类管理</div>
+      <div class="group-label">系统品类（不可删除）</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
+        <span class="badge badge-blue">油烟机</span>
+        <span class="badge badge-blue">燃气灶</span>
+        <span class="badge badge-blue">洗碗机</span>
+        <span class="badge badge-blue">消毒柜</span>
+        <span class="badge badge-blue">冰箱</span>
+        <span class="badge badge-blue">蒸烤箱</span>
+        <span class="badge badge-blue">灶集成</span>
+        <span class="badge badge-blue">行业总计</span>
+      </div>
+      <div class="group-label">自定义品类</div>
+      <div id="custom-cats-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="new-cat-input" placeholder="输入新品类名称" style="height:36px;padding:0 10px;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:14px;background:var(--bg);color:var(--text);flex:1;max-width:240px">
+        <button class="btn btn-primary" onclick="addCustomCat()">添加品类</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 看板 ===== -->
+<div id="panel-dashboard" class="panel">
+  <div class="dash-mode-bar">
+    <button class="mode-chip active" id="mode-month" onclick="setDashMode('month',this)">单月数据</button>
+    <button class="mode-chip" id="mode-ytd" onclick="setDashMode('ytd',this)">今年累计</button>
+    <label style="margin-left:8px">选择月份</label>
+    <input type="month" id="d-month" onchange="renderDashboard()">
+    <select id="d-cat" onchange="renderDashboard()"><option value="">全部品类</option></select>
+    <select id="d-ch" onchange="renderDashboard()"><option value="">全部渠道</option></select>
+    <select id="d-metric" onchange="renderDashboard()">
+      <option value="vol">销量（台）</option><option value="val">销额（万元）</option><option value="price">均价（元）</option>
+    </select>
+  </div>
+  <div id="dash-mode-label" style="font-size:12px;color:var(--text2);margin-bottom:1rem"></div>
+  <div id="dash-metrics" class="metric-grid"></div>
+  <div class="chart-row">
+    <div class="card"><div style="font-size:13px;font-weight:500;margin-bottom:.5rem" id="trend-title">趋势</div><div id="trend-legend" class="legend"></div><div class="chart-wrap"><canvas id="chart-trend"></canvas></div></div>
+    <div class="card"><div style="font-size:13px;font-weight:500;margin-bottom:.5rem" id="share-title">本期份额</div><div class="chart-wrap"><canvas id="chart-share"></canvas></div></div>
+  </div>
+  <div class="card"><div style="font-size:13px;font-weight:500;margin-bottom:.5rem">同比增速（%）</div><div id="yoy-legend" class="legend"></div><div class="chart-wrap" style="height:220px"><canvas id="chart-yoy"></canvas></div></div>
+  <div id="dash-empty" class="empty" style="display:none">暂无数据，请先录入</div>
+</div>
+
+<!-- ===== 明星型号 ===== -->
+<div id="panel-models" class="panel">
+  <div class="tabs-sub" style="margin-bottom:1rem">
+    <button class="tab-sub active" onclick="switchModelTab('view',this)">型号浏览</button>
+    <button class="tab-sub" onclick="switchModelTab('pk',this)">型号 PK</button>
+  </div>
+  <div id="model-view">
+    <div class="filter-row">
+      <select id="mm-month" onchange="renderModels()"><option value="">全部月份</option></select>
+      <select id="mm-brand" onchange="renderModels()"><option value="">全部品牌</option></select>
+      <select id="mm-cat" onchange="renderModels()"><option value="">全部品类</option></select>
+    </div>
+    <div id="models-wrap"><div class="empty">暂无型号数据</div></div>
+  </div>
+  <div id="model-pk" style="display:none">
+    <div class="pk-bar">
+      <div class="pk-slot" id="pk-slot-0" onclick="openPkPicker(0)"><i class="ti ti-plus"></i> 选择型号 A</div>
+      <div class="pk-vs">VS</div>
+      <div class="pk-slot" id="pk-slot-1" onclick="openPkPicker(1)"><i class="ti ti-plus"></i> 选择型号 B</div>
+      <button class="btn btn-primary" onclick="runPK()" style="margin-left:auto">开始对比</button>
+      <button class="btn" onclick="clearPK()">清除</button>
+    </div>
+    <div id="pk-result"></div>
+  </div>
+</div>
+
+<!-- 编辑弹窗 -->
+<div id="edit-modal" class="modal-overlay" style="display:none" onclick="closeModalIfBg(event,'edit-modal')">
+  <div class="modal">
+    <div class="modal-title">编辑记录 <button class="close-btn" onclick="closeModal('edit-modal')">×</button></div>
+    <div class="form-grid" style="margin-bottom:1rem">
+      <div class="form-row"><label>年月</label><input type="month" id="e-month"></div>
+      <div class="form-row"><label>品牌</label><input type="text" id="e-brand"></div>
+      <div class="form-row"><label>品类</label><select id="e-cat"></select></div>
+      <div class="form-row"><label>渠道</label><select id="e-channel"><option>线上</option><option>线下</option><option>专卖店</option><option>KA卖场</option><option>电商</option><option>家装渠道</option><option>下沉市场</option></select></div>
+    </div>
+    <div class="divider"></div>
+    <div class="group-label">本期数据</div>
+    <div class="form-grid-3" style="margin-bottom:.75rem">
+      <div class="form-row"><label>销量（台）</label><input type="number" id="e-vol" oninput="calcEditCurrent()"></div>
+      <div class="form-row"><label>销额（万元）</label><input type="number" id="e-val" oninput="calcEditCurrent()"></div>
+      <div class="form-row"><label>均价<span class="tag">自动</span></label><input id="e-price" readonly></div>
+    </div>
+    <div class="divider"></div>
+    <div class="group-label">同比 / 上年</div>
+    <div class="form-grid-2">
+      <div>
+        <div class="group-label" style="color:var(--text3)">同比增速</div>
+        <div class="form-grid-3">
+          <div class="form-row"><label>量同比（%）</label><input type="number" id="e-yoy-vol" oninput="calcEditFromYoy()"></div>
+          <div class="form-row"><label>额同比（%）</label><input type="number" id="e-yoy-val" oninput="calcEditFromYoy()"></div>
+          <div class="form-row"><label>价同比<span class="tag">自动</span></label><input id="e-yoy-price" readonly></div>
+        </div>
+      </div>
+      <div>
+        <div class="group-label" style="color:var(--text3)">上年数据</div>
+        <div class="form-grid-3">
+          <div class="form-row"><label>上年销量</label><input type="number" id="e-vol-ly" oninput="calcEditFromLY()"></div>
+          <div class="form-row"><label>上年销额</label><input type="number" id="e-val-ly" oninput="calcEditFromLY()"></div>
+          <div class="form-row"><label>上年均价<span class="tag">自动</span></label><input id="e-price-ly" readonly></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem">
+      <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+      <button class="btn" onclick="closeModal('edit-modal')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- PK 选择弹窗 -->
+<div id="pk-picker-modal" class="modal-overlay" style="display:none" onclick="closeModalIfBg(event,'pk-picker-modal')">
+  <div class="modal">
+    <div class="modal-title">选择型号 <button class="close-btn" onclick="closeModal('pk-picker-modal')">×</button></div>
+    <div class="filter-row">
+      <select id="pk-f-brand" onchange="renderPkPicker()"><option value="">全部品牌</option></select>
+      <select id="pk-f-cat" onchange="renderPkPicker()"><option value="">全部品类</option></select>
+    </div>
+    <div id="pk-picker-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;max-height:60vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<script>
+const BRAND_COLORS=['#378ADD','#1D9E75','#D85A30','#7F77DD','#BA7517','#D4537E','#639922','#73726c'];
+const BASE_CATS=['油烟机','燃气灶','洗碗机','消毒柜','冰箱','蒸烤箱','灶集成','行业总计'];
+let db={entries:[],models:[],customCats:[]};
+let charts={trend:null,share:null,yoy:null};
+let editId=null,pkSlots=[null,null],pkPickerTarget=0;
+let dashMode='month';
+
+// ===== 品类参数定义 =====
+const CAT_SPECS={
+  '油烟机':{sections:[
+    {label:'性能参数',fields:[
+      {key:'airflow',label:'风量（m³/h）',type:'number'},{key:'noise',label:'噪音（dB）',type:'number',betterLow:true},
+      {key:'motor_power',label:'电机功率（W）',type:'number'},{key:'pressure',label:'风压（Pa）',type:'number'},
+      {key:'size',label:'机身尺寸',type:'text',placeholder:'如 900mm'},{key:'suction_modes',label:'吸力模式数',type:'number'},
+    ]},
+    {label:'智能化功能',fields:[
+      {key:'auto_clean',label:'自动清洗',type:'toggle'},{key:'voice_control',label:'语音控制',type:'toggle'},
+      {key:'app_control',label:'App联动',type:'toggle'},{key:'linkage',label:'烟灶联动',type:'toggle'},
+      {key:'auto_sense',label:'自动感应',type:'toggle'},{key:'smart_features',label:'智能亮点',type:'text'},
+    ]},
+    {label:'情绪价值',fields:[
+      {key:'ambient_light',label:'氛围灯光',type:'toggle'},{key:'silent_mode',label:'静音夜间模式',type:'toggle'},
+      {key:'design_style',label:'设计风格',type:'text',placeholder:'如 隐藏式/极简'},{key:'emotion_features',label:'情绪价值亮点',type:'text'},
+    ]},
+    {label:'用户评价',fields:[
+      {key:'rating',label:'综合评分',type:'number'},{key:'good_rate',label:'好评率（%）',type:'number'},
+      {key:'review_count',label:'评价数量',type:'number'},{key:'core_praise',label:'核心好评点',type:'text'},{key:'core_complaint',label:'核心投诉点',type:'text'},
+    ]},
+  ]},
+  '燃气灶':{sections:[
+    {label:'性能参数',fields:[
+      {key:'heat_power',label:'额定热流量（kW）',type:'number'},{key:'burner_count',label:'炉头数',type:'number'},
+      {key:'ignition',label:'点火方式',type:'text',placeholder:'如 脉冲点火'},{key:'grate_material',label:'锅架材质',type:'text'},
+      {key:'panel_material',label:'面板材质',type:'text',placeholder:'如 钢化玻璃'},
+    ]},
+    {label:'安全功能',fields:[
+      {key:'flame_failure',label:'熄火保护',type:'toggle'},{key:'overheat',label:'过热保护',type:'toggle'},{key:'child_lock',label:'童锁',type:'toggle'},
+    ]},
+    {label:'智能化功能',fields:[
+      {key:'smart_fire',label:'智能火力调节',type:'toggle'},{key:'app_control',label:'App联控',type:'toggle'},
+      {key:'recipe_guide',label:'食谱引导',type:'toggle'},{key:'timer',label:'定时提醒',type:'toggle'},
+      {key:'smart_features',label:'智能亮点',type:'text'},
+    ]},
+    {label:'情绪价值',fields:[
+      {key:'design_style',label:'设计风格',type:'text'},{key:'emotion_features',label:'情绪价值亮点',type:'text'},
+    ]},
+    {label:'用户评价',fields:[
+      {key:'rating',label:'综合评分',type:'number'},{key:'good_rate',label:'好评率（%）',type:'number'},
+      {key:'review_count',label:'评价数量',type:'number'},{key:'core_praise',label:'核心好评点',type:'text'},{key:'core_complaint',label:'核心投诉点',type:'text'},
+    ]},
+  ]},
+  '洗碗机':{sections:[
+    {label:'性能参数',fields:[
+      {key:'capacity',label:'容量（套）',type:'number'},{key:'programs',label:'洗涤程序数',type:'number'},
+      {key:'dry_type',label:'烘干方式',type:'text',placeholder:'如 热风+余热'},{key:'sterilize_temp',label:'消毒温度（℃）',type:'number'},
+      {key:'noise',label:'噪音（dB）',type:'number',betterLow:true},{key:'bacteria_rate',label:'除菌率（%）',type:'number'},
+    ]},
+    {label:'智能化功能',fields:[
+      {key:'app_control',label:'App联动',type:'toggle'},{key:'custom_program',label:'自定义程序',type:'toggle'},
+      {key:'auto_dosing',label:'自动投放洗涤剂',type:'toggle'},{key:'smart_features',label:'智能亮点',type:'text'},
+    ]},
+    {label:'情绪价值',fields:[
+      {key:'design_style',label:'设计风格',type:'text',placeholder:'如 全嵌式隐藏'},{key:'free_time',label:'解放双手感受',type:'text'},{key:'emotion_features',label:'情绪价值亮点',type:'text'},
+    ]},
+    {label:'用户评价',fields:[
+      {key:'rating',label:'综合评分',type:'number'},{key:'good_rate',label:'好评率（%）',type:'number'},
+      {key:'review_count',label:'评价数量',type:'number'},{key:'core_praise',label:'核心好评点',type:'text'},{key:'core_complaint',label:'核心投诉点',type:'text'},
+    ]},
+  ]},
+  '消毒柜':{sections:[
+    {label:'性能参数',fields:[
+      {key:'volume',label:'容量（L）',type:'number'},{key:'sterilize_type',label:'消毒方式',type:'text',placeholder:'如 紫外线+臭氧'},
+      {key:'sterilize_temp',label:'消毒温度（℃）',type:'number'},{key:'layers',label:'层数',type:'number'},{key:'power',label:'功率（W）',type:'number'},
+    ]},
+    {label:'智能化功能',fields:[
+      {key:'app_control',label:'App联动',type:'toggle'},{key:'timer',label:'定时消毒',type:'toggle'},
+      {key:'auto_dry',label:'自动烘干',type:'toggle'},{key:'child_lock',label:'儿童锁',type:'toggle'},{key:'smart_features',label:'智能亮点',type:'text'},
+    ]},
+    {label:'情绪价值',fields:[
+      {key:'design_style',label:'设计风格',type:'text'},{key:'storage_beauty',label:'收纳美感',type:'text'},{key:'emotion_features',label:'情绪价值亮点',type:'text'},
+    ]},
+    {label:'用户评价',fields:[
+      {key:'rating',label:'综合评分',type:'number'},{key:'good_rate',label:'好评率（%）',type:'number'},
+      {key:'review_count',label:'评价数量',type:'number'},{key:'core_praise',label:'核心好评点',type:'text'},{key:'core_complaint',label:'核心投诉点',type:'text'},
+    ]},
+  ]},
+  '冰箱':{sections:[
+    {label:'性能参数',fields:[
+      {key:'volume',label:'容量（L）',type:'number'},{key:'energy_rating',label:'能效等级',type:'text',placeholder:'如 一级'},
+      {key:'noise',label:'噪音（dB）',type:'number',betterLow:true},{key:'compressor',label:'压缩机类型',type:'text',placeholder:'如 变频'},
+      {key:'freeze_temp',label:'冷冻温度（℃）',type:'number'},{key:'door_structure',label:'门体结构',type:'text',placeholder:'如 法式四门'},
+    ]},
+    {label:'智能化功能',fields:[
+      {key:'app_control',label:'App联控',type:'toggle'},{key:'food_recognition',label:'食材识别',type:'toggle'},
+      {key:'restock_remind',label:'智能补货提醒',type:'toggle'},{key:'voice_control',label:'语音控制',type:'toggle'},
+      {key:'screen_size',label:'屏幕尺寸',type:'text',placeholder:'如 21英寸'},{key:'smart_features',label:'智能亮点',type:'text'},
+    ]},
+    {label:'情绪价值',fields:[
+      {key:'design_style',label:'外观颜色/材质',type:'text',placeholder:'如 星云灰/玻璃面板'},{key:'embedded',label:'嵌入式设计',type:'toggle'},
+      {key:'lifestyle',label:'生活方式契合感',type:'text'},{key:'emotion_features',label:'情绪价值亮点',type:'text'},
+    ]},
+    {label:'用户评价',fields:[
+      {key:'rating',label:'综合评分',type:'number'},{key:'good_rate',label:'好评率（%）',type:'number'},
+      {key:'review_count',label:'评价数量',type:'number'},{key:'core_praise',label:'核心好评点',type:'text'},{key:'core_complaint',label:'核心投诉点',type:'text'},
+    ]},
+  ]},
+  '蒸烤箱':{sections:[
+    {label:'性能参数',fields:[
+      {key:'volume',label:'容量（L）',type:'number'},{key:'steam_rate',label:'蒸汽量（g/min）',type:'number'},
+      {key:'max_temp',label:'最高温度（℃）',type:'number'},{key:'functions',label:'蒸/烤/微波组合',type:'text'},{key:'probe',label:'探针测温',type:'toggle'},
+    ]},
+    {label:'智能化功能',fields:[
+      {key:'recipe_count',label:'内置菜谱数',type:'number'},{key:'screen_size',label:'屏幕尺寸',type:'text'},
+      {key:'app_control',label:'App联动',type:'toggle'},{key:'health_mode',label:'健康模式',type:'toggle'},
+      {key:'auto_preheat',label:'自动预热',type:'toggle'},{key:'smart_features',label:'智能亮点',type:'text'},
+    ]},
+    {label:'情绪价值',fields:[
+      {key:'design_style',label:'设计风格',type:'text'},{key:'light_cooking',label:'轻松烹饪感',type:'text'},{key:'emotion_features',label:'情绪价值亮点',type:'text'},
+    ]},
+    {label:'用户评价',fields:[
+      {key:'rating',label:'综合评分',type:'number'},{key:'good_rate',label:'好评率（%）',type:'number'},
+      {key:'review_count',label:'评价数量',type:'number'},{key:'core_praise',label:'核心好评点',type:'text'},{key:'core_complaint',label:'核心投诉点',type:'text'},
+    ]},
+  ]},
+  '灶集成':{sections:[
+    {label:'性能参数',fields:[
+      {key:'heat_power',label:'灶具热流量（kW）',type:'number'},{key:'burner_count',label:'炉头数',type:'number'},
+      {key:'steam_volume',label:'蒸箱容量（L）',type:'number'},{key:'oven_volume',label:'烤箱容量（L）',type:'number'},
+      {key:'oven_type',label:'蒸烤类型',type:'text',placeholder:'如 蒸+烤+微波'},{key:'probe',label:'探针测温',type:'toggle'},
+    ]},
+    {label:'智能化功能',fields:[
+      {key:'smoke_linkage',label:'烟灶联动',type:'toggle'},{key:'recipe_guide',label:'食谱引导',type:'toggle'},
+      {key:'app_control',label:'App联动',type:'toggle'},{key:'health_mode',label:'健康烹饪模式',type:'toggle'},
+      {key:'screen_size',label:'屏幕尺寸',type:'text'},{key:'recipe_count',label:'菜谱数量',type:'number'},
+      {key:'smart_fire',label:'智能火力调节',type:'toggle'},{key:'smart_features',label:'智能亮点',type:'text'},
+    ]},
+    {label:'情绪价值',fields:[
+      {key:'design_style',label:'设计风格',type:'text'},{key:'integrated_exp',label:'一体化体验感',type:'text'},{key:'emotion_features',label:'情绪价值亮点',type:'text'},
+    ]},
+    {label:'用户评价',fields:[
+      {key:'rating',label:'综合评分',type:'number'},{key:'good_rate',label:'好评率（%）',type:'number'},
+      {key:'review_count',label:'评价数量',type:'number'},{key:'core_praise',label:'核心好评点',type:'text'},{key:'core_complaint',label:'核心投诉点',type:'text'},
+    ]},
+  ]},
+};
+
+// ===== 工具函数 =====
+function n(v){return parseFloat(v)||0}
+function fmt(v,d=0){return v==null||isNaN(v)||v===0?'-':Number(v).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function fmtPct(v){if(v==null||isNaN(v))return'-';const s=parseFloat(v)>=0?'+':'';return s+parseFloat(v).toFixed(1)+'%'}
+function pctCls(v){if(v==null||isNaN(v))return'';return parseFloat(v)>=0?'pos':'neg'}
+function autoPrice(vol,val){return vol&&val?Math.round(val*10000/vol):0}
+function allCats(){return[...BASE_CATS,...db.customCats]}
+
+// ===== 品类选择器填充 =====
+function fillCatSelects(){
+  const cats=allCats();
+  ['in-cat','m-cat','e-cat','mm-cat','pk-f-cat'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const cur=el.value;
+    const isFilter=id==='mm-cat'||id==='pk-f-cat';
+    el.innerHTML=(isFilter?'<option value="">全部品类</option>':'')+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+    if(cats.includes(cur))el.value=cur;
+  });
+}
+
+// ===== 品类管理 =====
+function addCustomCat(){
+  const input=document.getElementById('new-cat-input');
+  const name=input.value.trim();
+  if(!name){alert('请输入品类名称');return}
+  if(allCats().includes(name)){alert('该品类已存在');return}
+  db.customCats.push(name);
+  save();fillCatSelects();renderCustomCats();
+  input.value='';
+}
+function deleteCustomCat(name){
+  if(!confirm(`确认删除品类「${name}」？已录入该品类的数据不受影响。`))return;
+  db.customCats=db.customCats.filter(c=>c!==name);
+  save();fillCatSelects();renderCustomCats();
+}
+function renderCustomCats(){
+  const wrap=document.getElementById('custom-cats-wrap');
+  if(!db.customCats.length){wrap.innerHTML='<span style="font-size:13px;color:var(--text3)">暂无自定义品类</span>';return}
+  wrap.innerHTML=db.customCats.map(c=>`<span class="custom-cat-chip"><span class="badge badge-green">${c}</span><button onclick="deleteCustomCat('${c}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:0" title="删除">×</button></span>`).join('');
+}
+
+// ===== 品类参数表单 =====
+function renderSpecForm(){
+  const cat=document.getElementById('m-cat').value;
+  const def=CAT_SPECS[cat];
+  const wrap=document.getElementById('spec-form-wrap');
+  if(!def){wrap.innerHTML='<div style="font-size:13px;color:var(--text3)">自定义品类暂无预设参数，可在型号备注中自由描述。</div>';return}
+  let html='';
+  def.sections.forEach(sec=>{
+    html+=`<div class="group-label" style="margin-top:.5rem">${sec.label}</div>`;
+    const toggles=sec.fields.filter(f=>f.type==='toggle');
+    const others=sec.fields.filter(f=>f.type!=='toggle');
+    if(toggles.length){
+      html+=`<div class="feature-toggle">`;
+      toggles.forEach(f=>{html+=`<button class="feature-chip" id="chip-${f.key}" onclick="toggleChip('${f.key}')">${f.label}</button>`});
+      html+=`</div>`;
+    }
+    if(others.length){
+      html+=`<div class="spec-form-grid">`;
+      others.forEach(f=>{
+        html+=`<div class="spec-form-row"><label>${f.label}</label><input type="${f.type==='text'?'text':'number'}" id="spec-${f.key}" placeholder="${f.placeholder||''}" ${f.betterLow?'data-better-low="1"':''}></div>`;
+      });
+      html+=`</div>`;
+    }
+  });
+  wrap.innerHTML=html;
+}
+function toggleChip(key){document.getElementById('chip-'+key)?.classList.toggle('on')}
+function collectSpecs(cat){
+  const def=CAT_SPECS[cat];if(!def)return{};
+  const specs={};
+  def.sections.forEach(sec=>{
+    sec.fields.forEach(f=>{
+      if(f.type==='toggle'){const btn=document.getElementById('chip-'+f.key);if(btn)specs[f.key]=btn.classList.contains('on')}
+      else{const el=document.getElementById('spec-'+f.key);if(el&&el.value!=='')specs[f.key]=f.type==='number'?parseFloat(el.value):el.value}
+    });
+  });
+  return specs;
+}
+
+// ===== 计算器 =====
+function calcCurrent(){
+  const p=autoPrice(n(document.getElementById('in-vol').value),n(document.getElementById('in-val').value));
+  document.getElementById('in-price').value=p||'';calcFromLY();
+}
+function calcFromYoy(){
+  const vol=n(document.getElementById('in-vol').value),val=n(document.getElementById('in-val').value);
+  const yV=document.getElementById('in-yoy-vol').value,yA=document.getElementById('in-yoy-val').value;
+  if(yV!==''&&vol)document.getElementById('in-vol-ly').value=Math.round(vol/(1+n(yV)/100));
+  if(yA!==''&&val)document.getElementById('in-val-ly').value=(val/(1+n(yA)/100)).toFixed(2);
+  calcFromLY();
+}
+function calcFromLY(){
+  const volLY=n(document.getElementById('in-vol-ly').value),valLY=n(document.getElementById('in-val-ly').value);
+  const pLY=autoPrice(volLY,valLY);document.getElementById('in-price-ly').value=pLY||'';
+  const vol=n(document.getElementById('in-vol').value),val=n(document.getElementById('in-val').value);
+  if(volLY&&vol&&document.getElementById('in-yoy-vol').value==='')document.getElementById('in-yoy-vol').value=((vol-volLY)/volLY*100).toFixed(1);
+  if(valLY&&val&&document.getElementById('in-yoy-val').value==='')document.getElementById('in-yoy-val').value=((val-valLY)/valLY*100).toFixed(1);
+  const p=n(document.getElementById('in-price').value);
+  if(p&&pLY)document.getElementById('in-yoy-price').value=((p-pLY)/pLY*100).toFixed(1);
+}
+function calcEditCurrent(){
+  const p=autoPrice(n(document.getElementById('e-vol').value),n(document.getElementById('e-val').value));
+  document.getElementById('e-price').value=p||'';calcEditFromLY();
+}
+function calcEditFromYoy(){
+  const vol=n(document.getElementById('e-vol').value),val=n(document.getElementById('e-val').value);
+  const yV=document.getElementById('e-yoy-vol').value,yA=document.getElementById('e-yoy-val').value;
+  if(yV!==''&&vol)document.getElementById('e-vol-ly').value=Math.round(vol/(1+n(yV)/100));
+  if(yA!==''&&val)document.getElementById('e-val-ly').value=(val/(1+n(yA)/100)).toFixed(2);
+  calcEditFromLY();
+}
+function calcEditFromLY(){
+  const volLY=n(document.getElementById('e-vol-ly').value),valLY=n(document.getElementById('e-val-ly').value);
+  const pLY=autoPrice(volLY,valLY);document.getElementById('e-price-ly').value=pLY||'';
+  const vol=n(document.getElementById('e-vol').value),val=n(document.getElementById('e-val').value);
+  if(volLY&&vol)document.getElementById('e-yoy-vol').value=((vol-volLY)/volLY*100).toFixed(1);
+  if(valLY&&val)document.getElementById('e-yoy-val').value=((val-valLY)/valLY*100).toFixed(1);
+  const p=n(document.getElementById('e-price').value);if(p&&pLY)document.getElementById('e-yoy-price').value=((p-pLY)/pLY*100).toFixed(1);
+}
+function getMonthTotal(month,brand,cat,channel){return db.entries.find(e=>e.month===month&&e.brand===brand&&e.cat===cat&&(!channel||e.channel===channel))}
+function updateModelTotals(){
+  const month=document.getElementById('m-month').value,brand=document.getElementById('m-brand').value.trim();
+  const cat=document.getElementById('m-cat').value,ch=document.getElementById('m-channel').value;
+  const hint=document.getElementById('model-total-hint');
+  if(!month||!brand){hint.textContent='';return}
+  const rec=getMonthTotal(month,brand,cat,ch);
+  if(rec)hint.innerHTML=`<span style="color:var(--blue)">✓</span> 找到月度汇总：<strong>${brand} / ${cat}${ch?' / '+ch:''} / ${month}</strong> — 销量 ${fmt(rec.vol)} 台，销额 ${fmt(rec.val)} 万，均价 ${fmt(rec.price)} 元`;
+  else hint.innerHTML=`<span style="color:var(--text3)">未找到对应月度汇总，占比计算不可用</span>`;
+}
+function calcModelFromPct(){
+  const month=document.getElementById('m-month').value,brand=document.getElementById('m-brand').value.trim();
+  const rec=getMonthTotal(month,brand,document.getElementById('m-cat').value,document.getElementById('m-channel').value);if(!rec)return;
+  const pV=document.getElementById('m-pct-vol').value,pA=document.getElementById('m-pct-val').value;
+  if(pV!=='')document.getElementById('m-vol').value=Math.round(rec.vol*n(pV)/100);
+  if(pA!=='')document.getElementById('m-val').value=(rec.val*n(pA)/100).toFixed(2);
+  calcModelPrice();
+}
+function syncModelPct(){
+  const month=document.getElementById('m-month').value,brand=document.getElementById('m-brand').value.trim();
+  const rec=getMonthTotal(month,brand,document.getElementById('m-cat').value,document.getElementById('m-channel').value);if(!rec)return;
+  const vol=n(document.getElementById('m-vol').value),val=n(document.getElementById('m-val').value);
+  if(vol&&rec.vol)document.getElementById('m-pct-vol').value=(vol/rec.vol*100).toFixed(1);
+  if(val&&rec.val)document.getElementById('m-pct-val').value=(val/rec.val*100).toFixed(1);
+}
+function calcModelPrice(){
+  const p=autoPrice(n(document.getElementById('m-vol').value),n(document.getElementById('m-val').value));
+  document.getElementById('m-price').value=p||'';
+}
+
+// ===== 存取 =====
+function now(){const d=new Date();return d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'))}
+function save(){localStorage.setItem('kd_db4',JSON.stringify(db))}
+function load(){
+  const s=localStorage.getItem('kd_db4')||localStorage.getItem('kd_db3')||localStorage.getItem('kd_db2')||localStorage.getItem('kd_db');
+  if(s)try{const d=JSON.parse(s);db.entries=d.entries||[];db.models=d.models||[];db.customCats=d.customCats||[]}catch(e){}
+}
+
+// ===== CRUD =====
+function addEntry(){
+  const brand=document.getElementById('in-brand').value==='自定义'?(document.getElementById('in-brand-custom').value.trim()||'自定义'):document.getElementById('in-brand').value;
+  const vol=n(document.getElementById('in-vol').value),val=n(document.getElementById('in-val').value);
+  const volLY=n(document.getElementById('in-vol-ly').value),valLY=n(document.getElementById('in-val-ly').value);
+  const entry={id:Date.now(),month:document.getElementById('in-month').value,brand,cat:document.getElementById('in-cat').value,channel:document.getElementById('in-channel').value,vol,val,volLY,valLY,price:autoPrice(vol,val),priceLY:autoPrice(volLY,valLY)};
+  if(!entry.month){alert('请选择年月');return}
+  db.entries.push(entry);save();updateFilters();renderTable();renderDashboard();
+  ['in-vol','in-val','in-vol-ly','in-val-ly','in-yoy-vol','in-yoy-val','in-brand-custom','in-price','in-price-ly','in-yoy-price'].forEach(id=>document.getElementById(id).value='');
+}
+function clearForm(){['in-vol','in-val','in-vol-ly','in-val-ly','in-yoy-vol','in-yoy-val','in-brand-custom','in-price','in-price-ly','in-yoy-price'].forEach(id=>document.getElementById(id).value='')}
+function deleteEntry(id){if(!confirm('确认删除？'))return;db.entries=db.entries.filter(e=>e.id!==id);save();updateFilters();renderTable();renderDashboard()}
+function openEdit(id){
+  const e=db.entries.find(r=>r.id===id);if(!e)return;editId=id;
+  document.getElementById('e-month').value=e.month||'';document.getElementById('e-brand').value=e.brand||'';
+  document.getElementById('e-cat').value=e.cat||BASE_CATS[0];document.getElementById('e-channel').value=e.channel||'线上';
+  document.getElementById('e-vol').value=e.vol||'';document.getElementById('e-val').value=e.val||'';document.getElementById('e-price').value=e.price||'';
+  document.getElementById('e-vol-ly').value=e.volLY||'';document.getElementById('e-val-ly').value=e.valLY||'';document.getElementById('e-price-ly').value=e.priceLY||'';
+  document.getElementById('e-yoy-vol').value=e.vol&&e.volLY?((e.vol-e.volLY)/e.volLY*100).toFixed(1):'';
+  document.getElementById('e-yoy-val').value=e.val&&e.valLY?((e.val-e.valLY)/e.valLY*100).toFixed(1):'';
+  document.getElementById('e-yoy-price').value=e.price&&e.priceLY?((e.price-e.priceLY)/e.priceLY*100).toFixed(1):'';
+  document.getElementById('edit-modal').style.display='flex';
+}
+function saveEdit(){
+  const idx=db.entries.findIndex(r=>r.id===editId);if(idx===-1)return;
+  const vol=n(document.getElementById('e-vol').value),val=n(document.getElementById('e-val').value);
+  const volLY=n(document.getElementById('e-vol-ly').value),valLY=n(document.getElementById('e-val-ly').value);
+  db.entries[idx]={...db.entries[idx],month:document.getElementById('e-month').value,brand:document.getElementById('e-brand').value.trim(),cat:document.getElementById('e-cat').value,channel:document.getElementById('e-channel').value,vol,val,volLY,valLY,price:autoPrice(vol,val),priceLY:autoPrice(volLY,valLY)};
+  save();updateFilters();renderTable();renderDashboard();closeModal('edit-modal');
+}
+function closeModal(id){document.getElementById(id).style.display='none';if(id==='edit-modal')editId=null}
+function closeModalIfBg(ev,id){if(ev.target===document.getElementById(id))closeModal(id)}
+
+function addModel(){
+  const vol=n(document.getElementById('m-vol').value),val=n(document.getElementById('m-val').value);
+  const cat=document.getElementById('m-cat').value;
+  const imgEl=document.getElementById('img-preview');
+  const entry={
+    id:Date.now(),month:document.getElementById('m-month').value,brand:document.getElementById('m-brand').value.trim(),cat,
+    channel:document.getElementById('m-channel').value,name:document.getElementById('m-name').value.trim(),
+    msrp:n(document.getElementById('m-msrp').value),vol,val,price:autoPrice(vol,val),
+    pctVol:document.getElementById('m-pct-vol').value?parseFloat(document.getElementById('m-pct-vol').value):null,
+    pctVal:document.getElementById('m-pct-val').value?parseFloat(document.getElementById('m-pct-val').value):null,
+    specs:collectSpecs(cat),img:imgEl.src&&imgEl.src!==location.href?imgEl.src:''
+  };
+  if(!entry.brand||!entry.name){alert('请填写品牌和型号名称');return}
+  db.models.push(entry);save();updateFilters();renderModels();
+  ['m-brand','m-name','m-vol','m-val','m-pct-vol','m-pct-val','m-msrp','m-price'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('img-preview-wrap').style.display='none';document.getElementById('img-preview').src='';document.getElementById('m-img').value='';
+  document.getElementById('model-total-hint').textContent='';renderSpecForm();
+}
+function deleteModel(id){if(!confirm('确认删除？'))return;db.models=db.models.filter(m=>m.id!==id);save();updateFilters();renderModels()}
+function previewImg(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{document.getElementById('img-preview').src=ev.target.result;document.getElementById('img-preview-wrap').style.display='block'};r.readAsDataURL(f)}
+
+// ===== 过滤器 =====
+function updateFilters(){
+  const months=[...new Set(db.entries.map(e=>e.month))].sort().reverse();
+  const brands=[...new Set(db.entries.map(e=>e.brand))];
+  const cats=[...new Set(db.entries.map(e=>e.cat))];
+  const channels=[...new Set(db.entries.map(e=>e.channel))];
+  const mMonths=[...new Set(db.models.map(m=>m.month))].sort().reverse();
+  const mBrands=[...new Set(db.models.map(m=>m.brand))];
+  const mCats=[...new Set(db.models.map(m=>m.cat))];
+  setOpts('f-month',months,'全部月份');setOpts('f-brand2',brands,'全部品牌');
+  setOpts('f-cat2',cats,'全部品类');setOpts('f-ch2',channels,'全部渠道');
+  setOpts('d-cat',cats,'全部品类');setOpts('d-ch',channels,'全部渠道');
+  setOpts('mm-month',mMonths,'全部月份');setOpts('mm-brand',mBrands,'全部品牌');setOpts('mm-cat',mCats,'全部品类');
+  setOpts('pk-f-brand',mBrands,'全部品牌');
+}
+function setOpts(id,vals,ph){const el=document.getElementById(id);if(!el)return;const cur=el.value;el.innerHTML=`<option value="">${ph}</option>`+vals.map(v=>`<option value="${v}">${v}</option>`).join('');if(vals.includes(cur))el.value=cur}
+
+// ===== 表格 =====
+function filterEntries(){
+  const m=document.getElementById('f-month').value,b=document.getElementById('f-brand2').value,c=document.getElementById('f-cat2').value,ch=document.getElementById('f-ch2').value;
+  return db.entries.filter(e=>(!m||e.month===m)&&(!b||e.brand===b)&&(!c||e.cat===c)&&(!ch||e.channel===ch));
+}
+function renderTable(){
+  const data=filterEntries();const wrap=document.getElementById('entry-table-wrap');
+  if(!data.length){wrap.innerHTML='<div class="empty">暂无数据</div>';return}
+  const yoy=(c,l)=>l?((c-l)/l*100):null;
+  wrap.innerHTML=`<table class="entry-table"><thead><tr><th>月份</th><th>品牌</th><th>品类</th><th>渠道</th><th style="text-align:right">销量</th><th style="text-align:right">销额</th><th style="text-align:right">均价</th><th style="text-align:right">上年销量</th><th style="text-align:right">上年销额</th><th style="text-align:right">上年均价</th><th style="text-align:right">量同比</th><th style="text-align:right">额同比</th><th style="text-align:right">价同比</th><th></th></tr></thead><tbody>${data.map(e=>{const yV=yoy(e.vol,e.volLY),yA=yoy(e.val,e.valLY),yP=yoy(e.price,e.priceLY);return`<tr><td>${e.month}</td><td><strong>${e.brand}</strong></td><td>${e.cat}</td><td>${e.channel}</td><td style="text-align:right">${fmt(e.vol)}</td><td style="text-align:right">${fmt(e.val)}</td><td style="text-align:right">${fmt(e.price)}</td><td style="text-align:right;color:var(--text2)">${fmt(e.volLY)}</td><td style="text-align:right;color:var(--text2)">${fmt(e.valLY)}</td><td style="text-align:right;color:var(--text2)">${fmt(e.priceLY)}</td><td style="text-align:right" class="${pctCls(yV)}">${fmtPct(yV)}</td><td style="text-align:right" class="${pctCls(yA)}">${fmtPct(yA)}</td><td style="text-align:right" class="${pctCls(yP)}">${fmtPct(yP)}</td><td style="display:flex;gap:4px"><button class="btn-edit" onclick="openEdit(${e.id})"><i class="ti ti-edit"></i></button><button class="delete-btn" onclick="deleteEntry(${e.id})"><i class="ti ti-trash"></i></button></td></tr>`}).join('')}</tbody></table>`;
+}
+
+// ===== 看板 =====
+function setDashMode(mode,el){
+  dashMode=mode;
+  document.querySelectorAll('.mode-chip').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  renderDashboard();
+}
+function getFilteredDash(){
+  const cat=document.getElementById('d-cat').value,ch=document.getElementById('d-ch').value;
+  return db.entries.filter(e=>(!cat||e.cat===cat)&&(!ch||e.channel===ch));
+}
+function aggVal(rows,m){
+  if(m==='price'){const tv=rows.reduce((s,e)=>s+e.val,0),tq=rows.reduce((s,e)=>s+e.vol,0);return tq?Math.round(tv*10000/tq):0}
+  return rows.reduce((s,e)=>s+(m==='vol'?e.vol:e.val),0);
+}
+function aggLY(rows,m){
+  if(m==='price'){const tv=rows.reduce((s,e)=>s+e.valLY,0),tq=rows.reduce((s,e)=>s+e.volLY,0);return tq?Math.round(tv*10000/tq):0}
+  return rows.reduce((s,e)=>s+(m==='vol'?e.volLY:e.valLY),0);
+}
+function renderDashboard(){
+  const data=getFilteredDash();const metric=document.getElementById('d-metric').value;
+  const lmap={vol:'销量（台）',val:'销额（万元）',price:'均价（元）'};const label=lmap[metric];
+  if(!data.length){document.getElementById('dash-metrics').innerHTML='';document.getElementById('dash-empty').style.display='block';destroyCharts();return}
+  document.getElementById('dash-empty').style.display='none';
+
+  const allMonths=[...new Set(data.map(e=>e.month))].sort();
+  const selectedMonth=document.getElementById('d-month').value;
+
+  let displayData,months,modeLabel;
+  if(dashMode==='month'){
+    const targetMonth=selectedMonth||(allMonths[allMonths.length-1]||'');
+    displayData=data.filter(e=>e.month===targetMonth);
+    months=allMonths;
+    modeLabel=`单月数据：${targetMonth}`;
+  } else {
+    // YTD：今年累计到选定月份
+    const targetMonth=selectedMonth||(allMonths[allMonths.length-1]||'');
+    const year=targetMonth.slice(0,4);
+    const ytdMonths=allMonths.filter(m=>m>=year+'-01'&&m<=targetMonth);
+    displayData=data.filter(e=>ytdMonths.includes(e.month));
+    months=ytdMonths;
+    modeLabel=`今年累计：${year}-01 至 ${targetMonth}`;
+  }
+
+  document.getElementById('dash-mode-label').textContent=modeLabel;
+
+  const brands=[...new Set(data.map(e=>e.brand))];
+  const tc=aggVal(displayData,metric),tl=aggLY(displayData,metric),yt=tl?(tc-tl)/tl*100:null;
+  let html=`<div class="metric"><div class="metric-label">统计口径</div><div class="metric-val" style="font-size:13px;margin-top:4px">${dashMode==='month'?'单月':'今年累计'}</div></div>
+  <div class="metric"><div class="metric-label">合计 ${label}</div><div class="metric-val">${fmt(tc)}</div>${yt!==null?`<div class="metric-yoy ${pctCls(yt)}">${parseFloat(yt)>=0?'▲':'▼'} ${Math.abs(yt).toFixed(1)}% 同比</div>`:''}</div>`;
+  brands.forEach((b,i)=>{
+    const bd=displayData.filter(e=>e.brand===b);const cur=aggVal(bd,metric),ly=aggLY(bd,metric);const yoy=ly?(cur-ly)/ly*100:null;
+    html+=`<div class="metric"><div class="metric-label">${b}</div><div class="metric-val" style="color:${BRAND_COLORS[i%BRAND_COLORS.length]}">${fmt(cur)}</div>${yoy!==null?`<div class="metric-yoy ${pctCls(yoy)}">${parseFloat(yoy)>=0?'▲':'▼'} ${Math.abs(yoy).toFixed(1)}%</div>`:''}</div>`;
+  });
+  document.getElementById('dash-metrics').innerHTML=html;
+  document.getElementById('trend-title').textContent=`各品牌 ${label} 趋势`;
+  document.getElementById('share-title').textContent=`${modeLabel} 品牌份额`;
+
+  const trendMonths=dashMode==='month'?allMonths:months;
+  const tds=brands.map((b,i)=>({
+    label:b,
+    data:trendMonths.map(m=>{
+      const rows=dashMode==='month'?data.filter(e=>e.month===m&&e.brand===b):data.filter(e=>e.month<=m&&e.month>=(m.slice(0,4)+'-01')&&e.brand===b);
+      return rows.length?aggVal(rows,metric):null;
+    }),
+    borderColor:BRAND_COLORS[i%BRAND_COLORS.length],backgroundColor:BRAND_COLORS[i%BRAND_COLORS.length]+'22',
+    borderWidth:2,pointRadius:4,tension:.35,fill:false,spanGaps:true
+  }));
+  document.getElementById('trend-legend').innerHTML=brands.map((b,i)=>`<div class="legend-item"><div class="legend-dot" style="background:${BRAND_COLORS[i%BRAND_COLORS.length]}"></div>${b}</div>`).join('');
+  const sv=brands.map(b=>aggVal(displayData.filter(e=>e.brand===b),metric));
+  const yoyB=brands.map((b,i)=>{const bd=displayData.filter(e=>e.brand===b);const c=aggVal(bd,metric),l=aggLY(bd,metric);return{brand:b,yoy:l?(c-l)/l*100:0,color:BRAND_COLORS[i%BRAND_COLORS.length]}});
+  document.getElementById('yoy-legend').innerHTML=yoyB.map(b=>`<div class="legend-item"><div class="legend-dot" style="background:${b.color}"></div>${b.brand}</div>`).join('');
+  destroyCharts();
+  charts.trend=new Chart(document.getElementById('chart-trend'),{type:'line',data:{labels:trendMonths,datasets:tds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:metric!=='price',ticks:{callback:v=>v.toLocaleString()}}}}});
+  charts.share=new Chart(document.getElementById('chart-share'),{type:'doughnut',data:{labels:brands,datasets:[{data:sv,backgroundColor:brands.map((_,i)=>BRAND_COLORS[i%BRAND_COLORS.length]),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:12},boxWidth:12}}}}});
+  charts.yoy=new Chart(document.getElementById('chart-yoy'),{type:'bar',data:{labels:yoyB.map(b=>b.brand),datasets:[{data:yoyB.map(b=>parseFloat(b.yoy.toFixed(1))),backgroundColor:yoyB.map(b=>parseFloat(b.yoy)>=0?'#1D9E7588':'#A32D2D88'),borderColor:yoyB.map(b=>parseFloat(b.yoy)>=0?'#1D9E75':'#A32D2D'),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}},x:{ticks:{autoSkip:false}}}}});
+}
+function destroyCharts(){['trend','share','yoy'].forEach(k=>{if(charts[k]){charts[k].destroy();charts[k]=null}})}
+
+// ===== 型号渲染 =====
+function specRows(model){
+  const def=CAT_SPECS[model.cat];if(!def||!model.specs)return'';
+  let html='';
+  def.sections.forEach(sec=>{
+    const hasData=sec.fields.some(f=>f.type==='toggle'?model.specs[f.key]===true:(model.specs[f.key]!=null&&model.specs[f.key]!==''));
+    if(!hasData)return;
+    html+=`<div class="spec-section-label">${sec.label}</div>`;
+    const togglesOn=sec.fields.filter(f=>f.type==='toggle'&&model.specs[f.key]===true);
+    if(togglesOn.length)html+=`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${togglesOn.map(f=>`<span style="padding:1px 7px;background:#E6F1FB;color:#0C447C;border-radius:10px;font-size:10px">${f.label}</span>`).join('')}</div>`;
+    sec.fields.filter(f=>f.type!=='toggle'&&model.specs[f.key]!=null&&model.specs[f.key]!=='').forEach(f=>{
+      html+=`<div class="spec-row"><span>${f.label}</span><span>${model.specs[f.key]}</span></div>`;
+    });
+  });
+  return html;
+}
+function renderModels(){
+  const m=document.getElementById('mm-month').value,b=document.getElementById('mm-brand').value,c=document.getElementById('mm-cat').value;
+  const data=db.models.filter(e=>(!m||e.month===m)&&(!b||e.brand===b)&&(!c||e.cat===c));
+  const wrap=document.getElementById('models-wrap');
+  if(!data.length){wrap.innerHTML='<div class="empty">暂无型号数据</div>';return}
+  const grouped={};
+  data.forEach(m=>{const k=m.brand+'-'+m.cat+'-'+m.month;if(!grouped[k])grouped[k]={brand:m.brand,cat:m.cat,month:m.month,items:[]};grouped[k].items.push(m)});
+  wrap.innerHTML=Object.values(grouped).map(g=>`<div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem"><strong>${g.brand}</strong><span class="badge badge-blue">${g.cat}</span><span class="badge badge-amber">${g.month}</span></div><div class="model-grid">${g.items.map(item=>`<div class="model-card"><div class="model-img-wrap">${item.img?`<img src="${item.img}" alt="${item.name}">`:'<i class="ti ti-photo" style="font-size:28px"></i>'}</div><div class="model-info"><div class="model-name">${item.name}</div>${item.channel?`<div class="model-sub"><i class="ti ti-building-store" style="font-size:11px"></i> ${item.channel}</div>`:''}<div class="model-sub">${item.msrp?'定价 '+fmt(item.msrp)+' 元':''}</div><div class="model-sub">${item.vol?'销量 '+fmt(item.vol)+' 台'+(item.pctVol!=null?' ('+item.pctVol.toFixed(1)+'%)':''):''}</div><div class="model-sub">${item.val?'销额 '+fmt(item.val)+' 万'+(item.pctVal!=null?' ('+item.pctVal.toFixed(1)+'%)':''):''}</div>${item.price?`<div class="model-sub" style="color:var(--text);font-weight:500">均价 ${fmt(item.price)} 元</div>`:''}<div class="model-specs">${specRows(item)}</div><button class="delete-btn" onclick="deleteModel(${item.id})" style="margin-top:6px"><i class="ti ti-trash"></i></button></div></div>`).join('')}</div></div>`).join('');
+}
+
+// ===== PK =====
+function switchModelTab(t,el){
+  document.querySelectorAll('#panel-models .tab-sub').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('model-view').style.display=t==='view'?'block':'none';
+  document.getElementById('model-pk').style.display=t==='pk'?'block':'none';
+}
+function openPkPicker(slot){pkPickerTarget=slot;renderPkPicker();document.getElementById('pk-picker-modal').style.display='flex'}
+function renderPkPicker(){
+  const b=document.getElementById('pk-f-brand').value,c=document.getElementById('pk-f-cat').value;
+  const data=db.models.filter(m=>(!b||m.brand===b)&&(!c||m.cat===c));
+  const wrap=document.getElementById('pk-picker-list');
+  if(!data.length){wrap.innerHTML='<div class="empty">暂无型号</div>';return}
+  wrap.innerHTML=data.map(m=>`<div onclick="selectPkModel(${m.id})" style="cursor:pointer;border:0.5px solid var(--border);border-radius:var(--radius);padding:10px;background:var(--bg);transition:all .15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:13px;font-weight:500">${m.name}</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${m.brand} · ${m.cat} · ${m.month}</div>${m.price?`<div style="font-size:11px;color:var(--text2);margin-top:2px">均价 ${fmt(m.price)} 元</div>`:''}</div>`).join('');
+}
+function selectPkModel(id){pkSlots[pkPickerTarget]=db.models.find(m=>m.id===id);updatePkSlotUI();closeModal('pk-picker-modal')}
+function updatePkSlotUI(){
+  [0,1].forEach(i=>{
+    const slot=document.getElementById('pk-slot-'+i);const m=pkSlots[i];
+    if(m)slot.innerHTML=`<strong>${m.name}</strong><br><span style="font-size:11px;color:var(--text2)">${m.brand} · ${m.cat}</span>`;
+    else slot.innerHTML=`<i class="ti ti-plus"></i> 选择型号 ${['A','B'][i]}`;
+    slot.classList.toggle('filled',!!m);
+  });
+}
+function clearPK(){pkSlots=[null,null];updatePkSlotUI();document.getElementById('pk-result').innerHTML=''}
+function runPK(){
+  const [a,b]=pkSlots;if(!a||!b){alert('请先选择两个型号');return}
+  const cat=a.cat;const def=CAT_SPECS[cat];
+  let html=`<div class="card"><table class="pk-table"><thead><tr><th class="pk-label">指标</th><th style="text-align:center">${a.name}<br><span style="font-size:11px;color:var(--text2)">${a.brand}</span></th><th style="text-align:center">${b.name}<br><span style="font-size:11px;color:var(--text2)">${b.brand}</span></th></tr></thead><tbody>`;
+  html+=`<tr class="pk-section-row"><td colspan="3">销售表现</td></tr>`;
+  const sf=[
+    {label:'月份',ka:a.month,kb:b.month,cmp:false},
+    {label:'销量（台）',ka:a.vol,kb:b.vol,fmt:true,cmp:true,betterHigh:true},
+    {label:'销额（万元）',ka:a.val,kb:b.val,fmt:true,cmp:true,betterHigh:true},
+    {label:'销售均价（元）',ka:a.price,kb:b.price,fmt:true,cmp:false},
+    {label:'定价（元）',ka:a.msrp,kb:b.msrp,fmt:true,cmp:false},
+    {label:'销量占比（%）',ka:a.pctVol!=null?a.pctVol.toFixed(1)+'%':'-',kb:b.pctVol!=null?b.pctVol.toFixed(1)+'%':'-',cmp:false},
+  ];
+  sf.forEach(f=>{
+    const va=f.fmt?fmt(f.ka):f.ka||'-',vb=f.fmt?fmt(f.kb):f.kb||'-';
+    let ca='',cb='';
+    if(f.cmp&&f.ka&&f.kb&&f.ka!==f.kb){ca=f.betterHigh?(f.ka>f.kb?'pk-win':'pk-lose'):(f.ka<f.kb?'pk-win':'pk-lose');cb=ca==='pk-win'?'pk-lose':'pk-win'}
+    html+=`<tr><td class="pk-label">${f.label}</td><td class="pk-val ${ca}">${va}${ca==='pk-win'?'<span class="pk-win-badge">优</span>':ca==='pk-lose'?'<span class="pk-lose-badge">劣</span>':''}</td><td class="pk-val ${cb}">${vb}${cb==='pk-win'?'<span class="pk-win-badge">优</span>':cb==='pk-lose'?'<span class="pk-lose-badge">劣</span>':''}</td></tr>`;
+  });
+  if(def&&a.specs&&b.specs){
+    def.sections.forEach(sec=>{
+      const rel=sec.fields.filter(f=>{const av=a.specs[f.key],bv=b.specs[f.key];return av!=null&&av!==''||bv!=null&&bv!==''});
+      if(!rel.length)return;
+      html+=`<tr class="pk-section-row"><td colspan="3">${sec.label}</td></tr>`;
+      rel.forEach(f=>{
+        const av=a.specs[f.key],bv=b.specs[f.key];let vaStr='',vbStr='',ca='',cb='';
+        if(f.type==='toggle'){
+          vaStr=av?'<span style="color:var(--green)">✓ 有</span>':'<span style="color:var(--text3)">— 无</span>';
+          vbStr=bv?'<span style="color:var(--green)">✓ 有</span>':'<span style="color:var(--text3)">— 无</span>';
+          if(av&&!bv){ca='pk-win';cb='pk-lose'}else if(!av&&bv){ca='pk-lose';cb='pk-win'}
+        } else if(f.type==='number'&&av!=null&&bv!=null&&av!==bv){
+          vaStr=fmt(av);vbStr=fmt(bv);const aWins=f.betterLow?av<bv:av>bv;
+          ca=aWins?'pk-win':'pk-lose';cb=aWins?'pk-lose':'pk-win';
+        } else {vaStr=av!=null&&av!==''?String(av):'—';vbStr=bv!=null&&bv!==''?String(bv):'—'}
+        html+=`<tr><td class="pk-label">${f.label}</td><td class="pk-val ${ca}">${vaStr}${ca==='pk-win'?'<span class="pk-win-badge">优</span>':ca==='pk-lose'?'<span class="pk-lose-badge">劣</span>':''}</td><td class="pk-val ${cb}">${vbStr}${cb==='pk-win'?'<span class="pk-win-badge">优</span>':cb==='pk-lose'?'<span class="pk-lose-badge">劣</span>':''}</td></tr>`;
+      });
+    });
+  }
+  html+=`</tbody></table>`;
+  // 得分统计
+  let aW=0,bW=0;
+  const tmp=document.createElement('div');tmp.innerHTML=html;
+  tmp.querySelectorAll('tr:not(.pk-section-row)').forEach(row=>{
+    const tds=[...row.querySelectorAll('td')];
+    if(tds[1]&&tds[1].querySelector('.pk-win-badge'))aW++;
+    if(tds[2]&&tds[2].querySelector('.pk-win-badge'))bW++;
+  });
+  html+=`<div style="display:flex;gap:16px;padding:1rem;border-top:0.5px solid var(--border);align-items:center"><div style="flex:1;text-align:center"><div style="font-size:28px;font-weight:500;color:${aW>=bW?'var(--green)':'var(--text3)'}">${aW}</div><div style="font-size:12px;color:var(--text2)">项优势<br>${a.name}</div></div><div style="font-size:20px;color:var(--text3)">:</div><div style="flex:1;text-align:center"><div style="font-size:28px;font-weight:500;color:${bW>=aW?'var(--green)':'var(--text3)'}">${bW}</div><div style="font-size:12px;color:var(--text2)">项优势<br>${b.name}</div></div></div></div>`;
+  document.getElementById('pk-result').innerHTML=html;
+}
+
+// ===== 导出导入 =====
+function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kitchendata_'+now()+'.json';a.click()}
+function handleImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const imp=JSON.parse(ev.target.result);if(imp.entries)db.entries.push(...imp.entries);if(imp.models)db.models.push(...imp.models);if(imp.customCats)db.customCats=[...new Set([...db.customCats,...imp.customCats])];save();fillCatSelects();renderCustomCats();updateFilters();renderTable();renderDashboard();renderModels();alert('导入成功')}catch(err){alert('格式错误')}};r.readAsText(f)}
+
+// ===== 导航 =====
+function switchTab(t,el){document.querySelectorAll('.tab-bar .tab').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.panel').forEach(e=>e.classList.remove('active'));el.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='dashboard')renderDashboard();if(t==='models')renderModels()}
+function switchSubTab(id,el){document.querySelectorAll('#panel-entry .tab-sub').forEach(e=>e.classList.remove('active'));el.classList.add('active');['sub-sales','sub-model','sub-cats'].forEach(s=>document.getElementById(s).style.display=s===id?'block':'none')}
+
+function init(){
+  document.getElementById('in-month').value=now();
+  document.getElementById('m-month').value=now();
+  document.getElementById('d-month').value=now();
+  load();fillCatSelects();renderCustomCats();updateFilters();renderTable();renderDashboard();renderModels();renderSpecForm();
+  document.getElementById('m-month').addEventListener('change',updateModelTotals);
+}
+init();
+</script>
+</body>
+</html>
